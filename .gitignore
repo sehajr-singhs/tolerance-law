@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+.venv*/
+*.egg-info/
+dist/
+build/
+
+# Environments
+.env
+.env.*
+
+# Kaggle artifacts
+.kaggle_output/
+.kaggle_out/
+
+# local experiment scratch (committed results live under results_tolerance/)
+results_tolerance/boundary.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

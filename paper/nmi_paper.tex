@@ -1,0 +1,197 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\input{generated/numbers.tex}
+
+\definecolor{steel}{RGB}{30,60,120}
+\titleformat{\section}{\large\bfseries\color{steel}}{\thesection}{0.6em}{}
+\titlespacing*{\section}{0pt}{2.2ex}{1.2ex}
+
+\title{\bfseries The Tolerance Law:\\[0.3em]
+\large Whether a Robot Can Learn a Manufacturing Skill Is Decided by the
+Engineering Tolerance, and the Boundary Follows a Measurable Power Law}
+\author{Sehaj Singh\\[0.4em]
+\small\emph{Manufacturing robotics, learning from demonstration}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fbox{\begin{minipage}{0.92\textwidth}\small
+\textbf{Standfirst.} A robot either can or cannot learn to insert a part --- and
+in our controlled study, that binary is decided by a number an engineer can
+read off a drawing: the \emph{clearance} in millimetres. Below a clearance
+threshold $c^*$, behavior cloning from an expert that itself succeeds on every
+episode produces policies that jam; above it, the same data pipeline succeeds.
+The threshold is not fixed. It moves as a power law of the data budget and
+model capacity --- and a closed-loop controller that does not know the law can
+find it online and run the process at its learnable edge.
+\end{minipage}}
+\end{center}
+
+\section{Introduction}
+
+Assembly is the least automated step in manufacturing. The same task that a
+human can do by feel remains beyond the reach of scripted robots when part
+variation, fixture drift, and measurement noise collide at a chamfer.
+Learning from demonstration (LfD) is the natural answer: a robot watches an
+expert insert a part and imitates. Yet industrial deployment of LfD remains
+rare, and the reason usually given is data --- there is never enough of it.
+
+We present evidence for a different and, we argue, more useful explanation.
+In a controlled contact-rich insertion task with real physics (MuJoCo), we
+vary one engineering parameter --- the lateral clearance $c$ between a peg
+and its channel --- and measure when behavior cloning succeeds. The result is
+not a gradual degradation but a \emph{boundary}: below a clearance $c^*$, the
+learned policy jams with near-certainty; above it, it inserts reliably. The
+boundary exists even when the expert teacher succeeds on 100\% of episodes at
+every clearance, which isolates the learner as the cause: behavior cloning of
+a sweeping insertion strategy loses fidelity as the entry window shrinks, and
+below the boundary the fitted sweep can no longer catch the channel.
+
+The second result is the law's engine: the boundary moves. More demonstrations
+push $c^*$ downward (a larger data budget buys the ability to learn tighter
+tolerances), and model capacity at a fixed budget can push it \emph{upward}
+(overfitting the demonstration noise). We fit $c^* \propto N^{\alpha}$ with
+$\alpha$ measured from the grid, and we show that an adaptive controller which
+doubles its budget until learning succeeds recovers the same law online ---
+without being told it exists. Finally, capacity itself can be bought: walking
+model width upward at a fixed budget finds the minimum capacity that learns at
+each clearance.
+
+We call the aggregate the \emph{Tolerance Law}: in assembly LfD, learnability
+is a phase transition in an engineering parameter, and the transition curve is
+a measurable, budget-dependent power law. If it holds beyond this planar task,
+it reframes the ``data problem'' of manufacturing robotics: the question is
+not only \emph{how much data}, but \emph{how tight a tolerance that data buys},
+and tightness is the number the factory already knows.
+
+\section{The task and the teacher}
+
+\paragraph{Environment.} A two-axis gantry stage carries a rigid peg
+($50\times50$\,mm face) toward a slot whose channel width is $2(\tfrac12
+w_{peg} + c)$, so $c$ is the per-side clearance in metres. The slot sits on a
+sliding fixture that is locked rigidly during each episode; its true position
+$y_{\mathrm{ch}}$ is sampled uniformly in $\pm 0.10$\,m and the robot observes
+a noisy measurement $y_{\mathrm{meas}} \sim \mathcal{N}(y_{\mathrm{ch}},
+\sigma_y^2)$ with $\sigma_y = 1.2$\,mm. Observations are
+$[\text{peg}_x, \text{peg}_y, \dot x, \dot y, y_{\mathrm{meas}}, F_x, F_y, t]$
+and actions are velocity commands integrated by position actuators that can
+sustain insertion force. Contact is resolved by MuJoCo's solver; the peg can
+jam, rub, and ratchet against the mouth edges. Six clearances span $c =
+0.0005$ to $0.016$\,m (0.5 to 16\,mm).
+
+\paragraph{The teacher is force-blind.} The expert aligns to the measured slot
+centre, then inserts while sweeping laterally with a deterministic
+time-based sinusoid (amplitude matched to the sensor noise) and, on a stall,
+retracting and re-approaching with a shifted sweep bias. It never reads the
+contact forces. Its success is \TLteacherTight\ at the tightest clearance and
+\TLteacherLoose\ at the loosest --- measured over 30 episodes each. The teacher
+thus generates high-quality, \emph{learnable} demonstrations at every
+clearance, so any failure below $c^*$ is a failure of the learner, not of the
+data. The sweep is a deterministic function of time (which is in the
+observation), so a behavior-cloned policy can in principle reproduce it; its
+\emph{fitted amplitude} is exactly the quantity that grows with data and
+capacity --- the mechanism behind the law.
+
+\paragraph{Learners.} Behavior cloning by regression (MSE on actions) with an
+MLP whose width $w$ and depth $d$ are the capacity axis (\TLwidths\
+capacity choices). Policies are trained on $N$ successful demonstrations
+(\TLbudgets\ budget levels) and evaluated on $n_{\mathrm{eval}} = 40$
+fresh episodes with 2 seeds ($\TLcells$ cells in total). Success is a fully
+seated peg held for 10 steps.
+
+\section{Results}
+
+\subsection{The phase transition in clearance}
+
+Figure~\ref{fig:phase} shows learned success as a function of clearance,
+capacity, and budget. Two facts stand out. First, at any fixed (capacity,
+budget), success rises steeply across a narrow clearance band --- the
+transition. Second, the transition location $c^*$ (interpolated at
+$\TLthreshold$ success) moves: for the reference capacity,
+$c^* = \TLa\, N^{\TLalphaNeg}$ ($R^2 = \TLr2$). More demonstrations buy
+tighter learnable tolerances, and the relationship is a clean power law.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{generated/fig_phase_diagram.png}
+\caption{Learned insertion success vs.\ clearance (mm) for state policies.
+Columns are model width, rows are demo budget; the dashed line marks the
+success threshold. The boundary moves down as the budget grows and is
+non-monotone in width at fixed budget.}
+\label{fig:phase}
+\end{figure}
+
+\subsection{Capacity is bought with data}
+
+At a fixed small budget, increasing width does not help or can hurt: the
+largest width overfits the demonstration noise and its boundary sits
+\emph{above} the smallest width's. At a large budget the ordering inverts and
+the largest width learns the tightest clearance. The phase diagram in
+Fig.~\ref{fig:phase} shows the crossing. This is the same capacity--data
+interaction reported for imitation learning at scale, here measured on an
+engineering axis: \emph{a bigger model needs a tighter-fitting data budget
+before it earns its capacity}.
+
+\subsection{The adaptive controller finds the law online}
+
+We run two closed-loop probes that know neither the grid nor the law.
+(1) \emph{Adaptive budget}: at each clearance, start with $N=15$
+demonstrations, train, evaluate; if success $<\TLthreshold$, double $N$ up to
+120. The minimal budget $N^*(c)$ recovers the same power law as the grid
+boundary. (2) \emph{Adaptive capacity}: at a fixed budget, walk model width
+upward until learning succeeds; the minimum width grows as clearance tightens.
+Both controllers need no model of the phenomenon --- they are the factory's
+online version of the phase diagram.
+
+\section{Discussion}
+
+\paragraph{Why this matters for industry.} Tolerance is the one variable in
+this study that is written on the drawing before the robot is ordered. The
+Tolerance Law converts it into a data requirement: to learn a
+$c=1$\,mm insertion, plan for $N \gtrsim$ the budget at which $c^* < 1$\,mm,
+or change the part. Adaptive control then runs the process at the boundary,
+trading data against tolerance in real time --- the same loop a process
+engineer runs by hand, automated.
+
+\paragraph{Why this matters for science.} Scaling laws have been measured for
+model performance in language and vision, but not --- to our knowledge --- for
+the \emph{learnability of contact-rich skills as a function of an engineering
+parameter}. Our contribution is to make the phase transition itself the
+object of study, with a falsifiable prediction (a power-law boundary in the
+data budget) and a closed-loop measurement protocol. The force-blind teacher
+and the deterministic sweep make the mechanism transparent: the learner must
+fit an oscillatory insertion strategy, and the fidelity of the fit is what
+capacity and data buy.
+
+\paragraph{Limitations.} One task (planar insertion), one simulator, one
+modality of observation. The law's constants ($a$, $\alpha$) are expected to
+be task- and mechanism-specific; what should transfer is the \emph{shape}:
+a boundary, its movement with budget and capacity, and the existence of an
+online controller that finds it. Confirming the shape on a second task (and on
+vision observations) is the immediate next step.
+
+\section*{Methods summary}
+
+All experiments run in MuJoCo 3.3.4 at 200\,Hz with position actuators
+(stiffness 150\,N/m axial, 400\,N/m lateral, force cap 80\,N). Behavior
+cloning uses Adam ($\mathrm{lr}=10^{-3}$), MSE loss, batch 256, 40 epochs,
+ReLU MLPs of width $\in \{\TLwidths values\}$ and depth 2--4 (\TLwidths\
+width choices). Success
+threshold $\TLthreshold$; boundary interpolated linearly between grid points.
+Full code, kernels, and raw JSON results are public.
+
+\vspace{1em}
+\noindent\small\textbf{Data and code availability.}
+Repository and Kaggle kernels reproducing every figure: see project page.
+
+\end{document}
