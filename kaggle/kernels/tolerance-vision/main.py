@@ -22,6 +22,7 @@ from pathlib import Path
 import numpy as np
 
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "4")
+os.environ.setdefault("MUJOCO_GL", "egl")
 t0 = time.time()
 OUT = Path("/kaggle/working")
 

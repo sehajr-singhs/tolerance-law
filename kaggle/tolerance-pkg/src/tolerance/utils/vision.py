@@ -10,6 +10,9 @@ preserving the observation dimensionality.
 
 from __future__ import annotations
 
+import os
+os.environ.setdefault("MUJOCO_GL", "egl")
+
 import numpy as np
 
 _renderer_cache: dict[tuple[int, int], object] = {}
