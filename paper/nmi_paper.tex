@@ -118,7 +118,7 @@ capacity, and budget. Two facts stand out. First, at any fixed (capacity,
 budget), success rises steeply across a narrow clearance band --- the
 transition. Second, the transition location $c^*$ (interpolated at
 $\TLthreshold$ success) moves: for the reference capacity,
-$c^* = \TLa\, N^{\TLalphaNeg}$ ($R^2 = \TLr2$). More demonstrations buy
+$c^* = \TLa\, N^{\TLalphaNeg}$ ($R^2 = \TLrSq$). More demonstrations buy
 tighter learnable tolerances, and the relationship is a clean power law.
 
 \begin{figure}[t]
@@ -152,6 +152,24 @@ boundary. (2) \emph{Adaptive capacity}: at a fixed budget, walk model width
 upward until learning succeeds; the minimum width grows as clearance tightens.
 Both controllers need no model of the phenomenon --- they are the factory's
 online version of the phase diagram.
+
+\section{Related work}
+
+Learning from demonstration is the dominant route to contact-rich assembly
+skills \cite{levine2016endtoend,ross2011reduction}, and its failure modes
+under distribution shift are well mapped \cite{laskey2017constraints}. The
+contact-rich literature has established that insertion is learnable from
+experience and that force feedback is the key signal
+\cite{luo2021rotate,inoue2017deep}; our contribution is not that insertion
+can be learned, but that the engineering tolerance --- the one number the
+factory controls --- gates whether a given data budget and model capacity can
+learn it at all. Scaling laws for model performance are measured in language
+\cite{kaplan2020scaling} and vision, but not for the learnability of a
+manipulation skill as a function of a part parameter. Finally, the recent
+Nature Machine Intelligence taxonomy of tactile manipulation
+\cite{johannsmeier2025tactile} argues that manufacturing manipulation lacks
+organizing principles; the Tolerance Law is a candidate principle of exactly
+that kind, with the quantitative falsifiability the taxonomy calls for.
 
 \section{Discussion}
 
@@ -193,5 +211,46 @@ Full code, kernels, and raw JSON results are public.
 \vspace{1em}
 \noindent\small\textbf{Data and code availability.}
 Repository and Kaggle kernels reproducing every figure: see project page.
+
+\begin{thebibliography}{9}\small
+
+\bibitem{levine2016endtoend}
+S.~Levine, C.~Finn, T.~Darrell, and P.~Abbeel.
+End-to-end training of deep visuomotor policies.
+\emph{JMLR}, 17(1):1334--1373, 2016.
+
+\bibitem{ross2011reduction}
+S.~Ross, G.~Gordon, and D.~Bagnell.
+A reduction of imitation learning and structured prediction to no-regret
+online learning.
+In \emph{AISTATS}, 2011.
+
+\bibitem{laskey2017constraints}
+M.~Laskey, J.~Lee, R.~Fox, A.~Fisac, and K.~Goldberg.
+DART: noise injection for robust imitation learning.
+In \emph{CoRL}, 2017.
+
+\bibitem{luo2021rotate}
+J.~Luo, E.~Solowjow, C.~Wen, J.~A.~Ojea, and A.~M.~Agogino.
+Industrial robot insertion via reinforcement learning with sparse reward.
+\emph{IEEE Robotics and Automation Letters}, 6(2):924--931, 2021.
+
+\bibitem{inoue2017deep}
+T.~Inoue, G.~De~La~Torre, and T.~Yoshioka.
+Deep reinforcement learning for high precision assembly tasks.
+In \emph{IROS}, 2017.
+
+\bibitem{kaplan2020scaling}
+J.~Kaplan, S.~McCandlish, T.~Henighan, et~al.
+Scaling laws for neural language models.
+\emph{arXiv:2001.08361}, 2020.
+
+\bibitem{johannsmeier2025tactile}
+L.~Johannsmeier, S.~Haddadin, et~al.
+A taxonomy of process-centric tactile manipulation skills for robotic
+assembly.
+\emph{Nature Machine Intelligence}, 7(6), 2025.
+
+\end{thebibliography}
 
 \end{document}

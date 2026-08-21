@@ -17,6 +17,11 @@ build/
 # local experiment scratch (committed results live under results_tolerance/)
 results_tolerance/boundary.log
 
+# LaTeX
+paper/*.aux
+paper/*.log
+paper/*.out
+
 # OS / editor
 .DS_Store
 Thumbs.db

@@ -164,8 +164,8 @@ def analyze(results: Path, out: Path) -> None:
     mac.append(r"% Do not edit by hand.")
     if teacher:
         t = {r["clearance"]: r["expert_success"] for r in teacher}
-        mac.append(r"\newcommand{\TLteacherTight}{%d\%}" % (t.get(0.0005, 1.0) * 100))
-        mac.append(r"\newcommand{\TLteacherLoose}{%d\%}" % (t.get(0.016, 1.0) * 100))
+        mac.append(r"\newcommand{\TLteacherTight}{%d\%%}" % int(t.get(0.0005, 1.0) * 100))
+        mac.append(r"\newcommand{\TLteacherLoose}{%d\%%}" % int(t.get(0.004, 1.0) * 100))
     if sweep:
         mac.append(r"\newcommand{\TLclearances}{%d}" % len(clearances))
         mac.append(r"\newcommand{\TLwidths}{%d}" % len(widths))
@@ -173,19 +173,13 @@ def analyze(results: Path, out: Path) -> None:
         mac.append(r"\newcommand{\TLseeds}{%d}" % len(seeds))
         mac.append(r"\newcommand{\TLcells}{%d}" % len(sweep))
         mac.append(r"\newcommand{\TLthreshold}{%.2f}" % SUCCESS_THRESHOLD)
-        for w in widths:
-            for n in budgets:
-                key = f"w{w}_N{n}"
-                if key in boundaries:
-                    mac.append(r"\newcommand{\TLcstarw%dN%d}{%.5f}" %
-                               (w, n, boundaries[key]))
         f = fits.get("budget_powerlaw", {})
         if f.get("b") is not None:
             mac.append(r"\newcommand{\TLalpha}{%.2f}" % (-f["b"]))
             mac.append(r"\newcommand{\TLalphaSE}{--}")
-            mac.append(r"\newcommand{\TLr2}{%.3f}" % f["r2"])
+            mac.append(r"\newcommand{\TLrSq}{%.3f}" % f["r2"])
             mac.append(r"\newcommand{\TLa}{%.4f}" % f["a"])
-        if fits.get("budget_powerlaw", {}).get("b") is not None:
+        if f.get("b") is not None:
             mac.append(r"\newcommand{\TLalphaNeg}{%.3f}" % f["b"])
     if adaptive:
         fit = report.get("adaptive_fit", {})
