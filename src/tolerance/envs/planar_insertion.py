@@ -33,7 +33,7 @@ import numpy as np
 DT = 0.02          # env step (s)
 SIM_DT = 0.005     # mujoco substep (s)
 SUBSTEPS = max(1, int(round(DT / SIM_DT)))
-HORIZON = 900      # max env steps per episode (room for expert retries)
+HORIZON = 1200     # max env steps per episode (room for expert retries at tight clearance)
 SUCCESS_HOLD = 10
 PEG_W = 0.05       # peg width (y extent)
 PEG_L = 0.10       # peg length (x extent)
@@ -42,8 +42,8 @@ SLOT_DEPTH = 0.12  # slot depth (x)
 BACK_WALL_X = SLOT_X0 + SLOT_DEPTH
 SEAT_X = BACK_WALL_X - PEG_L / 2.0   # peg center x when fully seated
 MAX_VEL = 0.08     # max stage speed (m/s) per action unit
-Y_MEAS_NOISE = 0.0025  # sigma of the slot-center sensor (m)
-FORCE_NOISE = 0.25     # sigma of the force sensor (N)
+Y_MEAS_NOISE = 0.0008  # sigma of the slot-center sensor (m) — sub-clearance
+FORCE_NOISE = 0.15     # sigma of the force sensor (N)
 CLEARANCE_DEFAULT = 0.006  # default half-gap between peg and wall (m)
 
 

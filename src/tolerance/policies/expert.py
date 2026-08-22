@@ -36,8 +36,8 @@ import numpy as np
 from ..envs.planar_insertion import SLOT_X0, PEG_L, SEAT_X, MAX_VEL
 
 APPROACH_X = SLOT_X0 - PEG_L - 0.04   # peg front 4 cm before the mouth
-DITHER_FREQ = 24.0                    # rad/s (3.8 Hz lateral sweep)
-SHIFT_CYCLE = [0.0, -1.0, 1.0]        # retry biases, in units of amplitude
+DITHER_FREQ = 30.0                    # rad/s (4.8 Hz lateral sweep — faster ratchet)
+SHIFT_CYCLE = [0.0, -1.0, 1.0, 0.5, -0.5]  # retry biases, in units of amplitude
 
 
 class DitherExpert:
@@ -47,11 +47,11 @@ class DitherExpert:
         self,
         insert_speed: float = 0.4,
         approach_speed: float = 0.5,
-        dither_amp: float = 0.005,
+        dither_amp: float = 0.012,
         dither_freq: float = DITHER_FREQ,
-        stall_window: int = 200,
-        stall_eps: float = 0.0003,
-        max_tries: int = 6,
+        stall_window: int = 80,
+        stall_eps: float = 0.0001,
+        max_tries: int = 16,
         rng: np.random.Generator | None = None,
     ):
         self.insert_speed = insert_speed

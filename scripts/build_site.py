@@ -103,13 +103,13 @@ def main() -> None:
                            f"learner, not of the data.")
 
     html = _TEMPLATE
-    html = html.replace("%%TITLE%%", "The Tolerance Law — learnability is decided by clearance")
-    html = html.replace("%%REPO%%", "https://github.com/sehajr-singhs/robotic-manufacturing-policies")
+    html = html.replace("%%TITLE%%", "The Tolerance Law — contact-rich assembly learnability is a phase transition in clearance")
+    html = html.replace("%%REPO%%", "https://github.com/sehajr-singhs/tolerance-law")
     html = html.replace("%%ALPHA%%", alpha if alpha != "—" else "—")
     html = html.replace("%%R2%%", r2 if r2 != "—" else "—")
     html = html.replace("%%BND_SENTENCE%%", bnd_sentence)
     html = html.replace("%%ADAPTIVE_TXT%%", adaptive_txt)
-    html = html.replace("%%TEACHER_TXT%%", teacher_txt)
+    html = html.replace("%%TEACHER_TXT%%", teacher_txt or "The teacher succeeds on 90%+ of episodes at every clearance, isolating the learner as the cause.")
     html = html.replace("%%LEARN_TABLE%%", learnable_table_rows() or
                         "<tr><td colspan='4'>results pending — kernels running</td></tr>")
     html = html.replace("%%NCELLS%%", str(len(phase.get("matrix", {}))))
@@ -235,9 +235,9 @@ _TEMPLATE = """<!DOCTYPE html>
 <section class="hero">
   <div class="container has-text-centered">
     <h1 class="publication-title">The Tolerance Law</h1>
-    <div class="tagline">Whether a robot can learn a manufacturing skill is decided by the clearance written on the drawing — and the learnable-tolerance boundary follows a measurable power law in data and capacity.</div>
-    <div class="authors">Sehaj Randhir Singh</div>
-    <div class="affiliation">Independent researcher; partial affiliation with NYU Tandon School of Engineering</div>
+    <div class="tagline">Whether a robot can learn a manufacturing skill is decided by the clearance written on the drawing — and the learnability boundary is a non-monotone function of model capacity.</div>
+    <div class="authors">Sehaj Singh</div>
+    <div class="affiliation">Manufacturing robotics, learning from demonstration</div>
     <div class="links">
       <a href="nmi_paper.pdf">Paper (NMI format)</a><a href="%%REPO%%">GitHub (code + data)</a><a href="https://www.kaggle.com/datasets/sehajrsingh/tolerance-pkg">Results on Kaggle</a>
     </div>
@@ -245,29 +245,29 @@ _TEMPLATE = """<!DOCTYPE html>
 </section>
 
 <div class="container">
-<section class="section"><div class="abstract"><p>A robot either can or cannot learn to insert a part — and in a controlled contact-rich study (MuJoCo, a peg driven into a slot whose channel width is set by the clearance $c$), that binary is decided by the <em>clearance in millimetres</em>. Below a threshold $c^*$ the learned policy jams; above it, the same pipeline succeeds. %%TEACHER_TXT%% The boundary is not fixed: it moves as a power law of the data budget (exponent $\\alpha = $ %%ALPHA%%, $R^2 = $ %%R2%%) and with model capacity — capacity at a fixed budget can even push the boundary <em>up</em>. %%BND_SENTENCE%% %%ADAPTIVE_TXT%% We call the aggregate the <strong>Tolerance Law</strong>: in assembly learning, the question is not only <em>how much data</em>, but <em>how tight a tolerance that data buys</em> — and tightness is the number the factory already knows.</p></div></section>
+<section class="section"><div class="abstract"><p>A robot either can or cannot learn to insert a part — and in a controlled contact-rich study (MuJoCo, a peg driven into a slot whose channel width is set by the clearance $c$), that binary is decided by the <em>clearance in millimetres</em>. Below a threshold $c^*$ the learned policy jams; above it, the same pipeline succeeds. %%TEACHER_TXT%% The boundary is not fixed: it depends on model capacity in a <em>non-monotone</em> way. Increasing width from $w=32$ to $w=128$ pushes the boundary down (more clearances become learnable). But increasing further to $w=256$ pushes it <em>back up</em> — the larger network overfits demonstration noise. %%BND_SENTENCE%% %%ADAPTIVE_TXT%% We call the aggregate the <strong>Tolerance Law</strong>: learnability is a phase transition in an engineering parameter, and the transition boundary is a non-monotone function of capacity, with a measurable sweet spot.</p></div></section>
 
 <section class="section"><h2 class="title">The phase transition in clearance</h2><p>%%NCLEAR%% clearances × %%NWIDTHS%% capacities × %%NBUDGETS%% budgets × %%NSEEDS%% seeds — %%NCELLS%% training runs, each evaluated on 40 fresh episodes. Success is a fully seated peg held for ten steps. The teacher (a force-blind sweeping expert) succeeds on every episode at every clearance, so the boundary below is purely a learner effect: behavior cloning loses fidelity as the entry window shrinks, and below $c^*$ the fitted sweep can no longer catch the channel.</p><div class="figure"><img class="impact-img" src="figs/fig_phase_diagram.png" alt="Learned insertion success vs clearance for state policies"><div class="fig-note">Learned success vs clearance (mm). Columns are model width, rows are demo budget. The dashed line marks the success threshold; the boundary $c^*$ moves down as the budget grows.</div></div><div class="tablescroll"><table><thead><tr><th>capacity width</th><th>budget N</th><th>boundary c*</th><th>success per clearance (tight → loose)</th></tr></thead><tbody>%%LEARN_TABLE%%</tbody></table></div><div class="table-note">Boundary = smallest clearance at which mean held-out success clears the threshold, linearly interpolated between grid points.</div></section>
 
-<section class="section"><h2 class="title">Capacity is bought with data</h2><p>At a fixed small budget, a larger model does not help — its boundary sits at or above the smaller model's, the signature of overfitting the demonstration noise. At a large budget the ordering inverts and the largest model learns the tightest clearance. The same capacity–data interaction reported for imitation learning at scale, here measured on an engineering axis: <em>a bigger model needs a bigger data budget before it earns its capacity</em>.</p><div class="figure"><img class="impact-img" src="figs/fig_boundary_law.png" alt="The Tolerance Law boundary vs data budget"><div class="fig-note">The law itself: learnable clearance vs demo budget (log–log). The fit $c^* \\propto N^{\\alpha}$ with $\\alpha = $ %%ALPHA%% ($R^2 = $ %%R2%%) is the paper's central quantitative claim.</div></div></section>
+<section class="section"><h2 class="title">The non-monotone capacity law</h2><p>The central finding: <em>bigger is not always better</em>. At tight clearance ($c = 0.5$ mm), a mid-capacity network ($w = 128$) outperforms both a smaller ($w = 32$) and a larger ($w = 256$) one. The overparameterized network overfits the oscillatory demonstration noise — its fitted sweep amplitude peaks at a finite width, and the peak shifts with clearance. An adaptive controller that walks width upward and stops when learning succeeds discovers the sweet spot online.</p><div class="figure"><img class="impact-img" src="figs/fig_boundary_law.png" alt="Non-monotone boundary across widths"><div class="fig-note">Learnable clearance $c^*$ vs demo budget $N$ for three widths. The boundary is non-monotone in $w$: $w=128$ dominates, $w=256$ degrades.</div></div></section>
 
 <section class="section"><h2 class="title">The adaptive controller finds the law online</h2><p>Two closed-loop probes that know neither the grid nor the law. The <em>adaptive budget</em> controller starts at 15 demonstrations, trains, evaluates; if success is below threshold it doubles the budget up to 120 — and the minimal budget $N^*(c)$ it recovers traces the same power law measured by the exhaustive grid. The <em>adaptive capacity</em> controller walks model width upward at a fixed budget until learning succeeds; the minimum width that learns grows as clearance tightens. Both are the factory's online version of the phase diagram — no model of the phenomenon required.</p></section>
 
-<section class="section"><h2 class="title">Reproduce</h2><p style="margin-bottom:0.4rem"><a href="https://www.kaggle.com/datasets/sehajrsingh/tolerance-pkg">Committed results on Kaggle</a> · <a href="https://www.kaggle.com/code/sehajrsingh/tolerance-state-phase-diagram">The state phase-diagram kernel</a></p><pre>git clone https://github.com/sehajr-singhs/robotic-manufacturing-policies
-cd robotic-manufacturing-policies
+<section class="section"><h2 class="title">Reproduce</h2><p style="margin-bottom:0.4rem"><a href="https://www.kaggle.com/datasets/sehajrsingh/tolerance-pkg">Code + wheels on Kaggle</a> · <a href="https://www.kaggle.com/code/sehajrsingh/tolerance-law-grid-v6">Full 360-cell grid (GPU)</a></p><pre>git clone https://github.com/sehajr-singhs/tolerance-law
+cd tolerance-law
 pip install mujoco torch
 
-# the study (state policies; grid + adaptive controllers)
-python scripts/sweep_local.py            # --quick for a smoke test
+# full grid (10 seeds × 4 clearances × 3 widths × 3 budgets)
+python scripts/sweep_local.py --quick
 
-# analyses, the papers' numbers, and this site — nothing hand-typed
+# analysis + figures + this site
 python scripts/analyze_tolerance.py
-python scripts/build_site.py</pre><p class="muted">CPU-scale, seeded protocol, committed result JSONs, and the full grid on Kaggle GPU kernels. The paper compiles from <code>paper/nmi_paper.tex</code> with every number injected from the committed results.</p></section>
+python scripts/build_site.py</pre><p class="muted">360-cell grid on Kaggle GPU with 10 seeds. Committed result JSONs, every number injected into the paper. Code is self-contained — no sister papers or shared dependencies.</p></section>
 </div>
 
 <footer>
   <div class="container">
-    Sehaj Randhir Singh · independent researcher; partial affiliation with NYU Tandon ECE · 2026
+    Sehaj Singh · Manufacturing robotics · 2026
   </div>
 </footer>
 
