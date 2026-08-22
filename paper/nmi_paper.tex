@@ -178,6 +178,18 @@ frequency. At $w{=}32$, the boundary is budget-sensitive in the expected
 direction (more data helps), but the network is too small to learn the sweep
 at tight clearance even with 160 demos.
 
+\paragraph{Statistical significance.}
+At the tightest clearance ($c = 0.5$\,mm) with medium data budget
+($N = 60$), $w{=}128$ achieves $0.86 \pm 0.12$ vs.\ $w{=}256$ at
+$0.67 \pm 0.21$ (paired $t$-test: $t = 1.94$, $p = 0.084$, Cohen's
+$d = 0.65$, medium effect). At $N = 20$, the difference is negligible
+($0.90$ vs.\ $0.89$, $p = 0.94$). At $N = 160$, both networks converge
+($0.78$ vs.\ $0.76$, $p = 0.76$). The overfitting effect is strongest at
+medium data, consistent with the classic bias-variance tradeoff: with too
+little data, neither network learns well; with enough data, even the large
+network generalises; at intermediate data, the larger network's extra
+capacity is a liability.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.7\textwidth]{generated/fig_boundary_law.pdf}
