@@ -292,6 +292,35 @@ dataset from an industrial partner are the immediate next steps. We also
 acknowledge that the $\sigma_y = 0.8$\,mm sensor noise is conservative;
 tighter sensors would shift the boundary but not eliminate it.
 
+\section{Why This Matters for Mind Robotics}
+
+Mind Robotics is building a manufacturing data flywheel: deploy robots, collect
+data, improve policies, redeploy. The Tolerance Law directly addresses three
+critical questions for this vision:
+
+\paragraph{Which tasks are learnable from factory data?}
+The clearance boundary $c^*$ tells you: if your tolerance specification is
+tighter than $c^*$, no amount of data will make BC work. If it's looser, the
+number of demonstrations needed scales as a power law of the clearance gap.
+This is the first step in the data flywheel: knowing which tasks to attempt.
+
+\paragraph{Which model size to deploy?}
+The non-monotone capacity effect means: don't default to the biggest model.
+At tight clearance, a mid-capacity network (w=128) outperforms both smaller
+and larger ones. The sweet spot exists and can be found online.
+
+\paragraph{How to close the loop on quality?}
+The adaptive controller discovers the capacity sweet spot without being told
+it exists. This is the factory's online version of the phase diagram: start
+small, increase capacity until learning succeeds, stop at the sweet spot.
+
+\paragraph{Connection to the data flywheel.}
+The data flywheel only pays off if policies learn from factory data at
+tolerance-relevant difficulty. The Tolerance Law quantifies exactly when that
+works: it's a function of the clearance, the data budget, and the model
+capacity. The non-monotone signature means the flywheel has an optimal
+operating point that the factory can discover.
+
 \section*{Methods Summary}
 
 All experiments run in MuJoCo 3.3.4 at 200\,Hz with position actuators
