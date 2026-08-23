@@ -1,0 +1,13 @@
+{
+  "id": "sehajrsingh/tolerance-vae-grid",
+  "title": "Tolerance Law VAE Grid",
+  "code_file": "main.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": false,
+  "dataset_sources": ["sehajrsingh/tolerance-pkg"],
+  "model_sources": [],
+  "competition_sources": []
+}
