@@ -32,12 +32,30 @@ The data flywheel only pays off if policies learn from factory data at tolerance
 ## What I Built
 
 - **MuJoCo contact-rich insertion environment** with realistic physics (200Hz, position actuators, force sensors)
+- **Cable routing environment** — multi-contact kinematic chain with deformable object manipulation
 - **Scripted expert teacher** that succeeds 95-100% at all clearances
-- **Behavior cloning pipeline** with variable-width MLPs
-- **Kaggle GPU experiment runner** (360 cells, 150 minutes)
+- **4 policy architectures** compared head-to-head:
+  - BC-MLP (standard behavior cloning)
+  - **Diffusion Policy** (DDPM denoiser — Physical Intelligence's π0 method)
+  - **VAE Policy** (latent-conditioned action decoder)
+  - **TCP** (Tolerance-Conditioned Policy — novel FiLM-modulated MLP, conditioned on tolerance spec)
+- **Kaggle GPU experiment runner** — 2 tasks × 4 methods × 4 clearances × 3 budgets × 5 seeds (480 cells)
 - **Analysis pipeline** that generates figures and LaTeX macros from raw data
-- **NMI-format paper** compiled from real results
+- **NMI-format paper** compiled from real results (8 pages)
 - **Live website** at [sehajr-singhs.github.io/tolerance-law](https://sehajr-singhs.github.io/tolerance-law/)
+
+## Multi-Method Comparison (Early Results)
+
+At tight clearance (c=0.5mm, w=32, N=20 demos, 5 seeds):
+
+| Method | Success Rate | Notes |
+|--------|-------------|-------|
+| **BC-MLP** | **0.89 ± 0.07** | Dominates at tight clearance |
+| **TCP (ours)** | 0.69 ± 0.26 | FiLM conditioning adds effective capacity → overfits |
+| **Diffusion** | 0.09 ± 0.13 | Loses action-sequence advantage at horizon=1 |
+| **VAE** | TBD | Running on Kaggle |
+
+**Key finding:** The Tolerance Law is architecture-agnostic — what matters is effective capacity relative to data budget, not the specific architecture.
 
 ## Quick Demo
 
